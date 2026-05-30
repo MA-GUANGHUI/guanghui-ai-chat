@@ -20,6 +20,7 @@
       --user: #2563eb;
       --shadow: rgba(15, 23, 42, 0.08);
       --danger: #ef4444;
+      --success: #10b981;
     }
 
     body.dark {
@@ -46,6 +47,75 @@
       background: var(--page);
       color: var(--text);
       font-family: "Inter", "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+
+    .auth-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: linear-gradient(135deg, #eff6ff, #f8fafc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body.dark .auth-screen {
+      background: linear-gradient(135deg, #020617, #111827);
+    }
+
+    .auth-card {
+      width: 380px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 20px 60px var(--shadow);
+    }
+
+    .auth-card h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -0.4px;
+    }
+
+    .auth-card p {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 10px 0 22px;
+    }
+
+    .auth-card input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 14px;
+      font-size: 15px;
+      background: var(--panel);
+      color: var(--text);
+      outline: none;
+    }
+
+    .auth-card button {
+      width: 100%;
+      margin-top: 14px;
+      border: none;
+      border-radius: 14px;
+      padding: 13px;
+      color: white;
+      background: var(--primary);
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .auth-card button:hover {
+      background: var(--primary-hover);
+    }
+
+    .auth-error {
+      margin-top: 12px;
+      color: var(--danger);
+      font-size: 13px;
+      min-height: 18px;
     }
 
     .app {
@@ -334,7 +404,7 @@
       width: 34px;
       height: 34px;
       border-radius: 12px;
-      background: #10b981;
+      background: var(--success);
       color: white;
       display: flex;
       align-items: center;
@@ -406,10 +476,6 @@
       border-radius: 12px;
       overflow-x: auto;
       white-space: pre;
-    }
-
-    body.dark pre {
-      background: rgba(0,0,0,0.25);
     }
 
     code {
@@ -564,6 +630,16 @@
 </head>
 
 <body>
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <h1>GuangHui AI Chat</h1>
+      <p id="authTip">正在检查访问权限...</p>
+      <input id="passwordInput" type="password" placeholder="请输入访问密码" />
+      <button onclick="login()">进入</button>
+      <div class="auth-error" id="authError"></div>
+    </div>
+  </div>
+
   <div class="app">
     <aside class="sidebar">
       <div class="brand">
@@ -579,6 +655,7 @@
       <div class="sidebar-bottom">
         <button class="small-action" onclick="copyCurrentChat()">复制当前会话</button>
         <button class="small-action" onclick="clearCurrentChat()">清空当前会话</button>
+        <button class="small-action" onclick="logout()">退出访问</button>
       </div>
     </aside>
 
@@ -647,9 +724,15 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "guanghui_ai_chat_sessions_v3";
-    const THEME_KEY = "guanghui_ai_theme_v3";
-    const MODEL_KEY = "guanghui_ai_selected_model_v3";
+    const STORAGE_KEY = "guanghui_ai_chat_sessions_clean";
+    const THEME_KEY = "guanghui_ai_theme_clean";
+    const MODEL_KEY = "guanghui_ai_selected_model_clean";
+    const PASSWORD_KEY = "guanghui_ai_access_password_clean";
+
+    const authScreen = document.getElementById("authScreen");
+    const authTip = document.getElementById("authTip");
+    const passwordInput = document.getElementById("passwordInput");
+    const authError = document.getElementById("authError");
 
     const chatListEl = document.getElementById("chatList");
     const messagesEl = document.getElementById("messages");
@@ -664,10 +747,11 @@
 
     let sessions = [];
     let currentId = null;
+    let passwordRequired = true;
 
     const fallbackModels = [
-      { id: "deepseek/deepseek-v4-flash:free", name: "DeepSeek V4 Flash Free" },
       { id: "openrouter/free", name: "OpenRouter Free" },
+      { id: "deepseek/deepseek-v4-flash:free", name: "DeepSeek V4 Flash Free" },
       { id: "openrouter/owl-alpha", name: "Owl Alpha Free" },
       { id: "poolside/laguna-xs.2:free", name: "Poolside Laguna XS.2 Free" },
       { id: "poolside/laguna-m.1:free", name: "Poolside Laguna M.1 Free" },
@@ -676,6 +760,117 @@
       { id: "openai/gpt-chat-latest", name: "GPT Chat Latest" },
       { id: "x-ai/grok-4.3", name: "Grok 4.3" }
     ];
+
+    function getPassword() {
+      return sessionStorage.getItem(PASSWORD_KEY) || "";
+    }
+
+    function setPassword(pwd) {
+      sessionStorage.setItem(PASSWORD_KEY, pwd);
+    }
+
+    function clearPassword() {
+      sessionStorage.removeItem(PASSWORD_KEY);
+    }
+
+    async function initAuth() {
+      authScreen.style.display = "flex";
+      authTip.textContent = "正在检查访问权限...";
+      passwordInput.style.display = "none";
+
+      try {
+        const res = await fetch("/auth/status");
+        const data = await res.json();
+
+        passwordRequired = !!data.password_required;
+
+        if (!passwordRequired) {
+          authScreen.style.display = "none";
+          return;
+        }
+
+        const savedPassword = getPassword();
+
+        if (savedPassword) {
+          const ok = await verifyPassword(savedPassword, false);
+          if (ok) {
+            authScreen.style.display = "none";
+            return;
+          }
+          clearPassword();
+        }
+
+        showLoginBox();
+
+      } catch (err) {
+        authTip.textContent = "权限检查失败，请刷新页面";
+        authError.textContent = err.message;
+      }
+    }
+
+    function showLoginBox() {
+      authTip.textContent = "请输入访问密码";
+      passwordInput.style.display = "block";
+      passwordInput.value = "";
+      authError.textContent = "";
+      setTimeout(() => passwordInput.focus(), 100);
+    }
+
+    async function verifyPassword(pwd, showError = true) {
+      try {
+        const res = await fetch("/auth", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ password: pwd })
+        });
+
+        if (res.ok) {
+          return true;
+        }
+
+        if (showError) {
+          authError.textContent = "密码错误";
+        }
+
+        return false;
+      } catch (err) {
+        if (showError) {
+          authError.textContent = "验证失败：" + err.message;
+        }
+        return false;
+      }
+    }
+
+    async function login() {
+      const pwd = passwordInput.value.trim();
+
+      if (!pwd) {
+        authError.textContent = "请输入密码";
+        return;
+      }
+
+      const ok = await verifyPassword(pwd, true);
+
+      if (ok) {
+        setPassword(pwd);
+        authScreen.style.display = "none";
+        inputEl.focus();
+      }
+    }
+
+    function logout() {
+      clearPassword();
+      showLoginBox();
+      authScreen.style.display = "flex";
+    }
+
+    passwordInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        login();
+      }
+    });
 
     function uid() {
       return "chat_" + Date.now() + "_" + Math.random().toString(16).slice(2);
@@ -979,7 +1174,7 @@
 
       const history = session.messages
         .filter(m => m.role === "user" || m.role === "assistant")
-        .slice(-12);
+        .slice(-10);
 
       try {
         const response = await fetch("/chat", {
@@ -989,13 +1184,22 @@
           },
           body: JSON.stringify({
             message: text,
-            model: modelSelect.value || "deepseek/deepseek-v4-flash:free",
+            model: modelSelect.value || "openrouter/free",
             history: history,
-            max_tokens: Number(maxTokens.value || 1024)
+            max_tokens: Number(maxTokens.value || 1024),
+            password: getPassword()
           })
         });
 
         const data = await response.json();
+
+        if (response.status === 401) {
+          clearPassword();
+          showLoginBox();
+          authScreen.style.display = "flex";
+          typingBubble.textContent = "访问密码错误，请重新登录";
+          return;
+        }
 
         if (data.reply) {
           typingBubble.innerHTML = simpleMarkdown(data.reply);
@@ -1055,6 +1259,7 @@
     loadTheme();
     loadSessions();
     loadModels();
+    initAuth();
     autoResize();
   </script>
 </body>

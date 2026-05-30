@@ -11,11 +11,16 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
 APP_PASSWORD = os.getenv("APP_PASSWORD", "").strip()
 
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+
 app = FastAPI(title="GuangHui AI Chat")
+
+
+class AuthRequest(BaseModel):
+    password: str = ""
 
 
 class ChatMessage(BaseModel):
@@ -38,6 +43,7 @@ MODELS = [
     {"id": "poolside/laguna-xs.2:free", "name": "Poolside Laguna XS.2 Free"},
     {"id": "poolside/laguna-m.1:free", "name": "Poolside Laguna M.1 Free"},
     {"id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "name": "NVIDIA Nemotron 3 Free"},
+
     {"id": "deepseek/deepseek-v4-flash", "name": "DeepSeek V4 Flash"},
     {"id": "deepseek/deepseek-v4-pro", "name": "DeepSeek V4 Pro"},
     {"id": "qwen/qwen3.7-max", "name": "Qwen3.7 Max"},
@@ -54,6 +60,16 @@ MODELS = [
 ]
 
 
+def password_required() -> bool:
+    return bool(APP_PASSWORD)
+
+
+def check_password(password: str) -> bool:
+    if not APP_PASSWORD:
+        return True
+    return password == APP_PASSWORD
+
+
 @app.get("/")
 def home():
     return FileResponse(BASE_DIR / "index.html")
@@ -61,7 +77,28 @@ def home():
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "password_required": password_required()
+    }
+
+
+@app.get("/auth/status")
+def auth_status():
+    return {
+        "password_required": password_required()
+    }
+
+
+@app.post("/auth")
+def auth(req: AuthRequest):
+    if check_password(req.password):
+        return {"ok": True}
+
+    return JSONResponse(
+        status_code=401,
+        content={"ok": False, "error": "访问密码错误"}
+    )
 
 
 @app.get("/models")
@@ -81,7 +118,7 @@ def debug_key():
 
 @app.post("/chat")
 def chat(req: ChatRequest):
-    if APP_PASSWORD and req.password != APP_PASSWORD:
+    if not check_password(req.password):
         return JSONResponse(
             status_code=401,
             content={"error": "访问密码错误"}
@@ -93,11 +130,14 @@ def chat(req: ChatRequest):
             content={"error": "OPENROUTER_API_KEY 未配置，请检查 Render 环境变量"}
         )
 
-    if not req.message.strip():
+    user_message = req.message.strip()
+    if not user_message:
         return JSONResponse(
             status_code=400,
             content={"error": "消息不能为空"}
         )
+
+    safe_max_tokens = min(max(int(req.max_tokens or 1024), 128), 2048)
 
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -127,10 +167,10 @@ def chat(req: ChatRequest):
             *history,
             {
                 "role": "user",
-                "content": req.message.strip()
+                "content": user_message
             }
         ],
-        "max_tokens": min(int(req.max_tokens or 1024), 2048),
+        "max_tokens": safe_max_tokens,
         "temperature": 0.7
     }
 
@@ -154,16 +194,17 @@ def chat(req: ChatRequest):
             )
 
         if resp.status_code != 200:
-            error_msg = (
-                result.get("error", {}).get("message")
-                if isinstance(result.get("error"), dict)
-                else result.get("error")
-            )
+            error_obj = result.get("error")
+
+            if isinstance(error_obj, dict):
+                error_msg = error_obj.get("message") or str(error_obj)
+            else:
+                error_msg = error_obj or "OpenRouter 请求失败"
 
             return JSONResponse(
                 status_code=resp.status_code,
                 content={
-                    "error": error_msg or "OpenRouter 请求失败",
+                    "error": error_msg,
                     "status_code": resp.status_code,
                     "raw": result
                 }
