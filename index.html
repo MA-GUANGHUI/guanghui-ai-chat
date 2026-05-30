@@ -11,7 +11,7 @@
       --panel: #ffffff;
       --panel-soft: #f1f5f9;
       --panel-hover: #eaf0f7;
-      --sidebar: rgba(255, 255, 255, 0.86);
+      --sidebar: #ffffff;
       --text: #0f172a;
       --muted: #64748b;
       --border: #e2e8f0;
@@ -25,7 +25,7 @@
       --danger: #ef4444;
       --success: #10b981;
       --warning: #f59e0b;
-      --glass: rgba(255, 255, 255, 0.76);
+      --glass: #ffffff;
       --sidebar-width: 300px;
       --sidebar-collapsed-width: 56px;
     }
@@ -35,14 +35,14 @@
       --panel: #111827;
       --panel-soft: #172033;
       --panel-hover: #202b42;
-      --sidebar: rgba(10, 15, 28, 0.9);
+      --sidebar: #070b16;
       --text: #f8fafc;
       --muted: #94a3b8;
       --border: #243047;
       --assistant: #141c2d;
       --shadow: rgba(0, 0, 0, 0.35);
       --shadow-strong: rgba(0, 0, 0, 0.55);
-      --glass: rgba(17, 24, 39, 0.74);
+      --glass: #111827;
     }
 
     * {
@@ -251,24 +251,42 @@
 
     .sidebar-toggle {
       position: absolute;
-      right: -14px;
-      top: 28px;
-      width: 28px;
-      height: 28px;
+      right: 14px;
+      top: 24px;
+      width: 34px;
+      height: 34px;
       border: 1px solid var(--border);
       background: var(--panel);
-      color: var(--text);
-      border-radius: 999px;
+      color: var(--muted);
+      border-radius: 12px;
       cursor: pointer;
       box-shadow: 0 8px 22px var(--shadow);
       z-index: 40;
       transition: 0.2s;
-      font-size: 15px;
+      font-size: 18px;
       line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
     }
 
     .sidebar-toggle:hover {
-      transform: scale(1.06);
+      transform: translateY(-1px);
+      color: var(--primary);
+      border-color: rgba(37, 99, 235, 0.35);
+    }
+
+    body.sidebar-collapsed .sidebar-toggle {
+      position: relative;
+      top: auto;
+      right: auto;
+      width: 38px;
+      height: 38px;
+      margin: 0 auto;
+      order: 2;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.10), rgba(124, 58, 237, 0.10));
     }
 
     .new-chat {
@@ -434,8 +452,7 @@
 
     .topbar {
       height: 72px;
-      background: var(--glass);
-      backdrop-filter: blur(16px);
+      background: var(--panel);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -485,7 +502,7 @@
       gap: 10px;
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 999px;
+      border-radius: 18px;
       padding: 8px 12px;
       box-shadow: 0 8px 24px var(--shadow);
       cursor: pointer;
@@ -559,8 +576,7 @@
       right: 0;
       width: 430px;
       max-width: calc(100vw - 40px);
-      background: var(--glass);
-      backdrop-filter: blur(18px);
+      background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 22px;
       box-shadow: 0 26px 80px var(--shadow-strong);
@@ -712,6 +728,16 @@
       background: rgba(124, 58, 237, 0.13);
     }
 
+    .model-tag.nvidia {
+      color: #365314;
+      background: rgba(132, 204, 22, 0.16);
+    }
+
+    .model-tag.provider {
+      color: #334155;
+      background: rgba(100, 116, 139, 0.12);
+    }
+
     body.dark .model-tag.free {
       color: #6ee7b7;
     }
@@ -726,6 +752,14 @@
 
     body.dark .model-tag.cerebras {
       color: #c4b5fd;
+    }
+
+    body.dark .model-tag.nvidia {
+      color: #bef264;
+    }
+
+    body.dark .model-tag.provider {
+      color: #cbd5e1;
     }
 
     .model-empty {
@@ -815,8 +849,7 @@
 
     .prompt-card {
       border: 1px solid var(--border);
-      background: var(--glass);
-      backdrop-filter: blur(12px);
+      background: var(--panel);
       border-radius: 22px;
       padding: 18px;
       text-align: left;
@@ -998,8 +1031,7 @@
     .composer {
       max-width: 940px;
       margin: 0 auto;
-      background: var(--glass);
-      backdrop-filter: blur(18px);
+      background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 26px;
       padding: 14px 14px 10px 18px;
@@ -1176,7 +1208,7 @@
 
   <div class="app">
     <aside class="sidebar">
-      <button class="sidebar-toggle" onclick="toggleSidebar()" title="展开 / 收起">☰</button>
+      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="收起侧边栏">‹</button>
 
       <div class="brand">
         <div class="brand-mark">M</div>
@@ -1223,7 +1255,7 @@
             <div class="model-menu" id="modelMenu">
               <div class="model-search">
                 <span>⌕</span>
-                <input id="modelSearchInput" type="text" placeholder="搜索模型，例如 DeepSeek / GPT / Claude" />
+                <input id="modelSearchInput" type="text" placeholder="搜索模型 / 来源" />
               </div>
               <div class="model-menu-list" id="modelMenuList"></div>
             </div>
@@ -1320,54 +1352,44 @@
     let selectedModelId = "openrouter/free";
 
     const fallbackModels = [
-      { id: "openrouter/free", name: "OpenRouter Free", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "cerebras/gpt-oss-120b", name: "Cerebras GPT OSS 120B", provider: "Cerebras", channel: "Cerebras" },
-      { id: "cerebras/zai-glm-4.7", name: "Cerebras ZAI GLM 4.7", provider: "Cerebras", channel: "Cerebras" },
-      { id: "deepseek/deepseek-v4-flash:free", name: "DeepSeek V4 Flash Free", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "openrouter/owl-alpha", name: "Owl Alpha Free", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "poolside/laguna-xs.2:free", name: "Poolside Laguna XS.2 Free", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "poolside/laguna-m.1:free", name: "Poolside Laguna M.1 Free", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", name: "NVIDIA Nemotron 3 Free", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "deepseek/deepseek-v4-flash", name: "DeepSeek V4 Flash", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "deepseek/deepseek-v4-pro", name: "DeepSeek V4 Pro", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "qwen/qwen3.7-max", name: "Qwen3.7 Max", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "qwen/qwen3.6-flash", name: "Qwen3.6 Flash", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "google/gemini-3.5-flash", name: "Gemini 3.5 Flash", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "google/gemini-3.1-flash-lite", name: "Gemini 3.1 Flash Lite", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "~google/gemini-flash-latest", name: "Gemini Flash Latest", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "openai/gpt-chat-latest", name: "GPT Chat Latest", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "~openai/gpt-mini-latest", name: "GPT Mini Latest", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "anthropic/claude-opus-4.8", name: "Claude Opus 4.8", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "~anthropic/claude-haiku-latest", name: "Claude Haiku Latest", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "~anthropic/claude-sonnet-latest", name: "Claude Sonnet Latest", provider: "OpenRouter", channel: "OpenRouter" },
-      { id: "x-ai/grok-4.3", name: "Grok 4.3", provider: "OpenRouter", channel: "OpenRouter" }
+      { id: "openrouter/free", name: "OpenRouter Free", provider: "OpenRouter", family: "Router" },
+      { id: "cerebras/gpt-oss-120b", name: "Cerebras GPT OSS 120B", provider: "Cerebras", family: "Fast LLM" },
+      { id: "cerebras/zai-glm-4.7", name: "Cerebras ZAI GLM 4.7", provider: "Cerebras", family: "Fast LLM" },
+      { id: "nvidia/nemotron-3-nano-30b-a3b", name: "NVIDIA Nemotron 3 Nano 30B", provider: "NVIDIA", family: "NIM" },
+      { id: "nvidia/llama-3.3-nemotron-super-49b-v1.5", name: "NVIDIA Nemotron Super 49B", provider: "NVIDIA", family: "NIM" },
+      { id: "nvidia/llama-3.1-nemotron-ultra-253b-v1", name: "NVIDIA Nemotron Ultra 253B", provider: "NVIDIA", family: "NIM" },
+      { id: "nvidia/qwen3-next-80b-a3b-instruct", name: "NVIDIA Qwen3 Next 80B", provider: "NVIDIA", family: "NIM" },
+      { id: "deepseek/deepseek-v4-flash:free", name: "DeepSeek V4 Flash Free", provider: "OpenRouter", family: "Free" },
+      { id: "openrouter/owl-alpha", name: "Owl Alpha Free", provider: "OpenRouter", family: "Free" },
+      { id: "google/gemini-3.5-flash", name: "Gemini 3.5 Flash", provider: "OpenRouter", family: "Google" },
+      { id: "openai/gpt-chat-latest", name: "GPT Chat Latest", provider: "OpenRouter", family: "OpenAI" },
+      { id: "anthropic/claude-opus-4.8", name: "Claude Opus 4.8", provider: "OpenRouter", family: "Anthropic" },
+      { id: "x-ai/grok-4.3", name: "Grok 4.3", provider: "OpenRouter", family: "xAI" }
     ];
 
 
     function normalizeProvider(model) {
       const raw = (model.provider || model.channel || "OpenRouter").toString().trim();
       const lowered = raw.toLowerCase();
+      const id = (model.id || "").toLowerCase();
 
-      if (lowered.includes("cerebras") || model.id.toLowerCase().startsWith("cerebras/")) {
-        return "Cerebras";
-      }
-
-      if (lowered.includes("openrouter")) {
-        return "OpenRouter";
-      }
-
-      return raw || "OpenRouter";
+      if (lowered.includes("nvidia") || id.startsWith("nvidia/")) return "NVIDIA";
+      if (lowered.includes("cerebras") || id.startsWith("cerebras/")) return "Cerebras";
+      if (lowered.includes("openrouter")) return "OpenRouter";
+      return raw || "Provider";
     }
 
     function providerClass(model) {
-      return normalizeProvider(model).toLowerCase().replace(/[^a-z0-9_-]/g, "");
+      const p = normalizeProvider(model).toLowerCase().replace(/[^a-z0-9_-]/g, "");
+      return p || "provider";
     }
 
     function providerDescription(model) {
       const provider = normalizeProvider(model);
-      const realId = model.real_id ? ` · 实际ID：${model.real_id}` : "";
-      return `来源：${provider} · 调用ID：${model.id}${realId}`;
+      const family = model.family || model.category || model.type || "LLM";
+      return `${provider} · ${family}`;
     }
+
     function isFreeModel(model) {
       const id = model.id.toLowerCase();
       const name = model.name.toLowerCase();
@@ -1382,6 +1404,7 @@
       const n = model.name.toLowerCase();
       const id = model.id.toLowerCase();
 
+      if (n.includes("nvidia") || id.startsWith("nvidia/")) return "NV";
       if (n.includes("cerebras") || id.includes("cerebras")) return "CB";
       if (n.includes("deepseek")) return "D";
       if (n.includes("gpt") || n.includes("openai")) return "G";
@@ -1524,10 +1547,19 @@
       );
     }
 
+    function syncSidebarToggle() {
+      const btn = document.getElementById("sidebarToggle");
+      if (!btn) return;
+      const collapsed = document.body.classList.contains("sidebar-collapsed");
+      btn.textContent = collapsed ? "›" : "‹";
+      btn.title = collapsed ? "展开侧边栏" : "收起侧边栏";
+    }
+
     function loadSidebarState() {
       if (localStorage.getItem(SIDEBAR_KEY) === "true") {
         document.body.classList.add("sidebar-collapsed");
       }
+      syncSidebarToggle();
     }
 
     function toggleSidebar() {
@@ -1536,6 +1568,7 @@
         SIDEBAR_KEY,
         document.body.classList.contains("sidebar-collapsed") ? "true" : "false"
       );
+      syncSidebarToggle();
     }
 
     function loadSessions() {
@@ -1844,7 +1877,6 @@
         info.appendChild(id);
 
         const tag = document.createElement("div");
-        const free = isFreeModel(model);
         const providerName = normalizeProvider(model);
         const pClass = providerClass(model);
         tag.className = "model-tag " + pClass;
