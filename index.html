@@ -11,7 +11,7 @@
       --panel: #ffffff;
       --panel-soft: #f1f5f9;
       --panel-hover: #eaf0f7;
-      --sidebar: rgba(255, 255, 255, 0.82);
+      --sidebar: rgba(255, 255, 255, 0.86);
       --text: #0f172a;
       --muted: #64748b;
       --border: #e2e8f0;
@@ -24,7 +24,10 @@
       --shadow-strong: rgba(15, 23, 42, 0.16);
       --danger: #ef4444;
       --success: #10b981;
-      --glass: rgba(255, 255, 255, 0.74);
+      --warning: #f59e0b;
+      --glass: rgba(255, 255, 255, 0.76);
+      --sidebar-width: 300px;
+      --sidebar-collapsed-width: 56px;
     }
 
     body.dark {
@@ -32,14 +35,14 @@
       --panel: #111827;
       --panel-soft: #172033;
       --panel-hover: #202b42;
-      --sidebar: rgba(10, 15, 28, 0.88);
+      --sidebar: rgba(10, 15, 28, 0.9);
       --text: #f8fafc;
       --muted: #94a3b8;
       --border: #243047;
       --assistant: #141c2d;
       --shadow: rgba(0, 0, 0, 0.35);
       --shadow-strong: rgba(0, 0, 0, 0.55);
-      --glass: rgba(17, 24, 39, 0.72);
+      --glass: rgba(17, 24, 39, 0.74);
     }
 
     * {
@@ -59,7 +62,6 @@
     }
 
     button,
-    select,
     textarea,
     input {
       font-family: inherit;
@@ -168,7 +170,7 @@
     }
 
     .sidebar {
-      width: 300px;
+      width: var(--sidebar-width);
       background: var(--sidebar);
       backdrop-filter: blur(18px);
       border-right: 1px solid var(--border);
@@ -182,8 +184,8 @@
     }
 
     body.sidebar-collapsed .sidebar {
-      width: 76px;
-      padding: 18px 10px;
+      width: var(--sidebar-collapsed-width);
+      padding: 18px 7px;
     }
 
     .brand {
@@ -192,6 +194,12 @@
       align-items: center;
       gap: 12px;
       min-height: 54px;
+    }
+
+    body.sidebar-collapsed .brand {
+      padding-left: 0;
+      padding-right: 0;
+      justify-content: center;
     }
 
     .brand-mark {
@@ -208,10 +216,15 @@
       box-shadow: 0 10px 28px rgba(37, 99, 235, 0.28);
     }
 
+    body.sidebar-collapsed .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+    }
+
     .brand-text {
       min-width: 0;
       overflow: hidden;
-      transition: opacity 0.16s ease;
     }
 
     body.sidebar-collapsed .brand-text,
@@ -238,10 +251,10 @@
 
     .sidebar-toggle {
       position: absolute;
-      right: -15px;
-      top: 26px;
-      width: 30px;
-      height: 30px;
+      right: -14px;
+      top: 28px;
+      width: 28px;
+      height: 28px;
       border: 1px solid var(--border);
       background: var(--panel);
       color: var(--text);
@@ -250,6 +263,8 @@
       box-shadow: 0 8px 22px var(--shadow);
       z-index: 40;
       transition: 0.2s;
+      font-size: 15px;
+      line-height: 1;
     }
 
     .sidebar-toggle:hover {
@@ -276,7 +291,8 @@
 
     body.sidebar-collapsed .new-chat {
       justify-content: center;
-      padding: 13px 0;
+      padding: 12px 0;
+      border-radius: 15px;
     }
 
     .new-chat:hover {
@@ -300,12 +316,14 @@
     }
 
     .chat-list::-webkit-scrollbar,
-    .chat-area::-webkit-scrollbar {
+    .chat-area::-webkit-scrollbar,
+    .model-menu-list::-webkit-scrollbar {
       width: 8px;
     }
 
     .chat-list::-webkit-scrollbar-thumb,
-    .chat-area::-webkit-scrollbar-thumb {
+    .chat-area::-webkit-scrollbar-thumb,
+    .model-menu-list::-webkit-scrollbar-thumb {
       background: rgba(148, 163, 184, 0.4);
       border-radius: 999px;
     }
@@ -325,7 +343,8 @@
 
     body.sidebar-collapsed .chat-item {
       justify-content: center;
-      padding: 12px 0;
+      padding: 10px 0;
+      border-radius: 14px;
     }
 
     .chat-icon {
@@ -339,6 +358,11 @@
       flex-shrink: 0;
       color: var(--muted);
       font-size: 13px;
+    }
+
+    body.sidebar-collapsed .chat-icon {
+      width: 30px;
+      height: 30px;
     }
 
     .chat-item:hover,
@@ -449,17 +473,30 @@
       gap: 12px;
     }
 
-    .model-wrap {
+    .model-picker {
       position: relative;
+      min-width: 360px;
+    }
+
+    .model-trigger {
+      width: 100%;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 999px;
-      padding: 6px 12px;
+      padding: 8px 12px;
       box-shadow: 0 8px 24px var(--shadow);
-      min-width: 330px;
+      cursor: pointer;
+      color: var(--text);
+      transition: 0.2s;
+    }
+
+    .model-trigger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px var(--shadow);
+      border-color: rgba(37, 99, 235, 0.28);
     }
 
     .model-dot {
@@ -471,22 +508,195 @@
       flex-shrink: 0;
     }
 
-    .model-label {
-      color: var(--muted);
+    .model-trigger-label {
       font-size: 12px;
-      white-space: nowrap;
+      color: var(--muted);
+      flex-shrink: 0;
     }
 
-    .model-select {
+    .model-trigger-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .model-chevron {
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+
+    .model-picker.open .model-chevron {
+      transform: rotate(180deg);
+    }
+
+    .model-menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 430px;
+      max-width: calc(100vw - 40px);
+      background: var(--glass);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 26px 80px var(--shadow-strong);
+      padding: 12px;
+      display: none;
+      z-index: 1000;
+    }
+
+    .model-picker.open .model-menu {
+      display: block;
+      animation: menuIn 0.16s ease;
+    }
+
+    @keyframes menuIn {
+      from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .model-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 9px 12px;
+      margin-bottom: 10px;
+    }
+
+    .model-search span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .model-search input {
       flex: 1;
       border: none;
       background: transparent;
-      color: var(--text);
       outline: none;
-      font-size: 13px;
-      font-weight: 700;
-      min-width: 0;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .model-menu-list {
+      max-height: 380px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-right: 4px;
+    }
+
+    .model-option {
+      border: none;
+      background: transparent;
+      color: var(--text);
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 15px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      text-align: left;
+      transition: 0.15s;
+    }
+
+    .model-option:hover {
+      background: var(--panel-soft);
+    }
+
+    .model-option.active {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(124, 58, 237, 0.12));
+      border: 1px solid rgba(37, 99, 235, 0.18);
+    }
+
+    .model-badge-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 13px;
+      background: var(--panel-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--primary);
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .model-option.active .model-badge-icon {
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: white;
+    }
+
+    .model-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .model-name {
+      font-size: 14px;
+      font-weight: 800;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .model-id {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .model-tag {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 7px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+
+    .model-tag.free {
+      color: #047857;
+      background: rgba(16, 185, 129, 0.12);
+    }
+
+    .model-tag.paid {
+      color: #92400e;
+      background: rgba(245, 158, 11, 0.13);
+    }
+
+    body.dark .model-tag.free {
+      color: #6ee7b7;
+    }
+
+    body.dark .model-tag.paid {
+      color: #fbbf24;
+    }
+
+    .model-empty {
+      color: var(--muted);
+      font-size: 13px;
+      padding: 18px 12px;
+      text-align: center;
     }
 
     .btn {
@@ -550,7 +760,7 @@
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-  }
+    }
 
     .welcome p {
       margin: 16px auto 0;
@@ -716,27 +926,6 @@
       background: var(--panel-soft);
     }
 
-    .msg-actions {
-      display: flex;
-      gap: 8px;
-      padding-left: 4px;
-    }
-
-    .mini-btn {
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 12px;
-      padding: 4px 7px;
-      border-radius: 8px;
-    }
-
-    .mini-btn:hover {
-      background: var(--panel-soft);
-      color: var(--text);
-    }
-
     pre {
       background: rgba(15, 23, 42, 0.08);
       border: 1px solid var(--border);
@@ -757,7 +946,7 @@
 
     .composer-wrap {
       position: fixed;
-      left: 300px;
+      left: var(--sidebar-width);
       right: 0;
       bottom: 0;
       padding: 22px 30px 26px;
@@ -767,7 +956,7 @@
     }
 
     body.sidebar-collapsed .composer-wrap {
-      left: 76px;
+      left: var(--sidebar-collapsed-width);
     }
 
     .composer {
@@ -897,7 +1086,7 @@
       }
 
       body.sidebar-collapsed .sidebar {
-        width: 300px;
+        width: var(--sidebar-width);
       }
 
       .composer-wrap,
@@ -909,13 +1098,17 @@
         padding: 0 16px;
       }
 
-      .model-wrap {
-        min-width: 190px;
-        width: 190px;
+      .model-picker {
+        min-width: 220px;
       }
 
-      .model-label {
+      .model-trigger-label {
         display: none;
+      }
+
+      .model-menu {
+        right: -70px;
+        width: 360px;
       }
 
       .prompt-grid {
@@ -980,11 +1173,23 @@
         </div>
 
         <div class="top-controls">
-          <div class="model-wrap">
-            <span class="model-dot"></span>
-            <span class="model-label">Model</span>
-            <select id="modelSelect" class="model-select"></select>
+          <div class="model-picker" id="modelPicker">
+            <button class="model-trigger" id="modelTrigger" onclick="toggleModelMenu()" type="button">
+              <span class="model-dot"></span>
+              <span class="model-trigger-label">Model</span>
+              <span class="model-trigger-name" id="modelTriggerName">加载模型中...</span>
+              <span class="model-chevron">⌄</span>
+            </button>
+
+            <div class="model-menu" id="modelMenu">
+              <div class="model-search">
+                <span>⌕</span>
+                <input id="modelSearchInput" type="text" placeholder="搜索模型，例如 DeepSeek / GPT / Claude" />
+              </div>
+              <div class="model-menu-list" id="modelMenuList"></div>
+            </div>
           </div>
+
           <button class="btn" onclick="toggleTheme()">主题</button>
         </div>
       </header>
@@ -1061,12 +1266,18 @@
     const welcome = document.getElementById("welcome");
     const currentTitle = document.getElementById("currentTitle");
     const currentModelText = document.getElementById("currentModelText");
-    const modelSelect = document.getElementById("modelSelect");
     const maxTokens = document.getElementById("maxTokens");
+
+    const modelPicker = document.getElementById("modelPicker");
+    const modelTriggerName = document.getElementById("modelTriggerName");
+    const modelMenuList = document.getElementById("modelMenuList");
+    const modelSearchInput = document.getElementById("modelSearchInput");
 
     let sessions = [];
     let currentId = null;
     let passwordRequired = true;
+    let models = [];
+    let selectedModelId = "openrouter/free";
 
     const fallbackModels = [
       { id: "openrouter/free", name: "OpenRouter Free" },
@@ -1074,11 +1285,46 @@
       { id: "openrouter/owl-alpha", name: "Owl Alpha Free" },
       { id: "poolside/laguna-xs.2:free", name: "Poolside Laguna XS.2 Free" },
       { id: "poolside/laguna-m.1:free", name: "Poolside Laguna M.1 Free" },
+      { id: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", name: "NVIDIA Nemotron 3 Free" },
+      { id: "deepseek/deepseek-v4-flash", name: "DeepSeek V4 Flash" },
+      { id: "deepseek/deepseek-v4-pro", name: "DeepSeek V4 Pro" },
       { id: "qwen/qwen3.7-max", name: "Qwen3.7 Max" },
+      { id: "qwen/qwen3.6-flash", name: "Qwen3.6 Flash" },
       { id: "google/gemini-3.5-flash", name: "Gemini 3.5 Flash" },
+      { id: "google/gemini-3.1-flash-lite", name: "Gemini 3.1 Flash Lite" },
+      { id: "~google/gemini-flash-latest", name: "Gemini Flash Latest" },
       { id: "openai/gpt-chat-latest", name: "GPT Chat Latest" },
+      { id: "~openai/gpt-mini-latest", name: "GPT Mini Latest" },
+      { id: "anthropic/claude-opus-4.8", name: "Claude Opus 4.8" },
+      { id: "~anthropic/claude-haiku-latest", name: "Claude Haiku Latest" },
+      { id: "~anthropic/claude-sonnet-latest", name: "Claude Sonnet Latest" },
       { id: "x-ai/grok-4.3", name: "Grok 4.3" }
     ];
+
+    function isFreeModel(model) {
+      const id = model.id.toLowerCase();
+      const name = model.name.toLowerCase();
+
+      return id.includes(":free") ||
+        name.includes("free") ||
+        id === "openrouter/free" ||
+        id === "openrouter/owl-alpha";
+    }
+
+    function modelInitial(model) {
+      const n = model.name.toLowerCase();
+
+      if (n.includes("deepseek")) return "D";
+      if (n.includes("gpt") || n.includes("openai")) return "G";
+      if (n.includes("claude")) return "C";
+      if (n.includes("gemini")) return "G";
+      if (n.includes("qwen")) return "Q";
+      if (n.includes("grok")) return "X";
+      if (n.includes("poolside")) return "P";
+      if (n.includes("nvidia")) return "N";
+      if (n.includes("owl")) return "O";
+      return "AI";
+    }
 
     function getPassword() {
       return sessionStorage.getItem(PASSWORD_KEY) || "";
@@ -1456,38 +1702,123 @@
       try {
         const res = await fetch("/models");
         const data = await res.json();
-        renderModels(data.models || fallbackModels);
+        models = data.models && data.models.length ? data.models : fallbackModels;
       } catch {
-        renderModels(fallbackModels);
+        models = fallbackModels;
       }
-    }
-
-    function renderModels(models) {
-      modelSelect.innerHTML = "";
-
-      models.forEach(model => {
-        const option = document.createElement("option");
-        option.value = model.id;
-        option.textContent = model.name;
-        modelSelect.appendChild(option);
-      });
 
       const saved = localStorage.getItem(MODEL_KEY);
-      if (saved) {
-        modelSelect.value = saved;
+      selectedModelId = saved || "openrouter/free";
+
+      if (!models.some(m => m.id === selectedModelId)) {
+        selectedModelId = models[0]?.id || "openrouter/free";
       }
 
-      updateModelText();
+      renderModelMenu();
+      updateSelectedModelUI();
     }
 
-    function updateModelText() {
-      const selected = modelSelect.options[modelSelect.selectedIndex];
-      currentModelText.textContent = selected ? selected.textContent : "未选择模型";
+    function toggleModelMenu() {
+      modelPicker.classList.toggle("open");
+
+      if (modelPicker.classList.contains("open")) {
+        modelSearchInput.value = "";
+        renderModelMenu();
+        setTimeout(() => modelSearchInput.focus(), 80);
+      }
     }
 
-    modelSelect.addEventListener("change", () => {
-      localStorage.setItem(MODEL_KEY, modelSelect.value);
-      updateModelText();
+    function closeModelMenu() {
+      modelPicker.classList.remove("open");
+    }
+
+    function renderModelMenu() {
+      const keyword = modelSearchInput.value.trim().toLowerCase();
+
+      const filtered = models.filter(model => {
+        return model.name.toLowerCase().includes(keyword) ||
+          model.id.toLowerCase().includes(keyword);
+      });
+
+      modelMenuList.innerHTML = "";
+
+      if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "model-empty";
+        empty.textContent = "没有找到匹配模型";
+        modelMenuList.appendChild(empty);
+        return;
+      }
+
+      filtered.forEach(model => {
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "model-option" + (model.id === selectedModelId ? " active" : "");
+
+        const icon = document.createElement("div");
+        icon.className = "model-badge-icon";
+        icon.textContent = modelInitial(model);
+
+        const info = document.createElement("div");
+        info.className = "model-info";
+
+        const name = document.createElement("div");
+        name.className = "model-name";
+        name.textContent = model.name;
+
+        const id = document.createElement("div");
+        id.className = "model-id";
+        id.textContent = model.id;
+
+        info.appendChild(name);
+        info.appendChild(id);
+
+        const tag = document.createElement("div");
+        const free = isFreeModel(model);
+        tag.className = "model-tag " + (free ? "free" : "paid");
+        tag.textContent = free ? "FREE" : "PAID";
+
+        option.appendChild(icon);
+        option.appendChild(info);
+        option.appendChild(tag);
+
+        option.onclick = () => {
+          selectedModelId = model.id;
+          localStorage.setItem(MODEL_KEY, selectedModelId);
+          updateSelectedModelUI();
+          renderModelMenu();
+          closeModelMenu();
+        };
+
+        modelMenuList.appendChild(option);
+      });
+    }
+
+    function updateSelectedModelUI() {
+      const selected = models.find(m => m.id === selectedModelId) || models[0];
+
+      if (!selected) {
+        modelTriggerName.textContent = "未选择模型";
+        currentModelText.textContent = "未选择模型";
+        return;
+      }
+
+      modelTriggerName.textContent = selected.name;
+      currentModelText.textContent = selected.name;
+    }
+
+    modelSearchInput.addEventListener("input", renderModelMenu);
+
+    document.addEventListener("click", event => {
+      if (!modelPicker.contains(event.target)) {
+        closeModelMenu();
+      }
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        closeModelMenu();
+      }
     });
 
     async function sendMessage() {
@@ -1517,7 +1848,7 @@
           },
           body: JSON.stringify({
             message: text,
-            model: modelSelect.value || "openrouter/free",
+            model: selectedModelId || "openrouter/free",
             history: history,
             max_tokens: Number(maxTokens.value || 1024),
             password: getPassword()
