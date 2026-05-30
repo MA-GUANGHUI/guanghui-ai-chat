@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from pathlib import Path
 import requests
 import os
@@ -39,32 +39,136 @@ class ChatRequest(BaseModel):
 
 
 MODELS = [
-    # OpenRouter
-    {"id": "openrouter/free", "name": "OpenRouter Free", "provider": "openrouter"},
-    {"id": "deepseek/deepseek-v4-flash:free", "name": "DeepSeek V4 Flash Free", "provider": "openrouter"},
-    {"id": "openrouter/owl-alpha", "name": "Owl Alpha Free", "provider": "openrouter"},
-    {"id": "poolside/laguna-xs.2:free", "name": "Poolside Laguna XS.2 Free", "provider": "openrouter"},
-    {"id": "poolside/laguna-m.1:free", "name": "Poolside Laguna M.1 Free", "provider": "openrouter"},
-    {"id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "name": "NVIDIA Nemotron 3 Free", "provider": "openrouter"},
+    {
+        "id": "openrouter/free",
+        "name": "OpenRouter Free",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "deepseek/deepseek-v4-flash:free",
+        "name": "DeepSeek V4 Flash Free",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "openrouter/owl-alpha",
+        "name": "Owl Alpha Free",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "poolside/laguna-xs.2:free",
+        "name": "Poolside Laguna XS.2 Free",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "poolside/laguna-m.1:free",
+        "name": "Poolside Laguna M.1 Free",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "name": "NVIDIA Nemotron 3 Free",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "deepseek/deepseek-v4-flash",
+        "name": "DeepSeek V4 Flash",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "deepseek/deepseek-v4-pro",
+        "name": "DeepSeek V4 Pro",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "qwen/qwen3.7-max",
+        "name": "Qwen3.7 Max",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "qwen/qwen3.6-flash",
+        "name": "Qwen3.6 Flash",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "google/gemini-3.5-flash",
+        "name": "Gemini 3.5 Flash",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "google/gemini-3.1-flash-lite",
+        "name": "Gemini 3.1 Flash Lite",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "~google/gemini-flash-latest",
+        "name": "Gemini Flash Latest",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "openai/gpt-chat-latest",
+        "name": "GPT Chat Latest",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "~openai/gpt-mini-latest",
+        "name": "GPT Mini Latest",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "anthropic/claude-opus-4.8",
+        "name": "Claude Opus 4.8",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "~anthropic/claude-haiku-latest",
+        "name": "Claude Haiku Latest",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "~anthropic/claude-sonnet-latest",
+        "name": "Claude Sonnet Latest",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
+    {
+        "id": "x-ai/grok-4.3",
+        "name": "Grok 4.3",
+        "provider": "OpenRouter",
+        "channel": "OpenRouter",
+    },
 
-    {"id": "deepseek/deepseek-v4-flash", "name": "DeepSeek V4 Flash", "provider": "openrouter"},
-    {"id": "deepseek/deepseek-v4-pro", "name": "DeepSeek V4 Pro", "provider": "openrouter"},
-    {"id": "qwen/qwen3.7-max", "name": "Qwen3.7 Max", "provider": "openrouter"},
-    {"id": "qwen/qwen3.6-flash", "name": "Qwen3.6 Flash", "provider": "openrouter"},
-    {"id": "google/gemini-3.5-flash", "name": "Gemini 3.5 Flash", "provider": "openrouter"},
-    {"id": "google/gemini-3.1-flash-lite", "name": "Gemini 3.1 Flash Lite", "provider": "openrouter"},
-    {"id": "~google/gemini-flash-latest", "name": "Gemini Flash Latest", "provider": "openrouter"},
-    {"id": "openai/gpt-chat-latest", "name": "GPT Chat Latest", "provider": "openrouter"},
-    {"id": "~openai/gpt-mini-latest", "name": "GPT Mini Latest", "provider": "openrouter"},
-    {"id": "anthropic/claude-opus-4.8", "name": "Claude Opus 4.8", "provider": "openrouter"},
-    {"id": "~anthropic/claude-haiku-latest", "name": "Claude Haiku Latest", "provider": "openrouter"},
-    {"id": "~anthropic/claude-sonnet-latest", "name": "Claude Sonnet Latest", "provider": "openrouter"},
-    {"id": "x-ai/grok-4.3", "name": "Grok 4.3", "provider": "openrouter"},
-
-    # Cerebras
-    # 前端展示用 id 带 cerebras/ 前缀；真正请求 Cerebras 时使用 real_id。
-    {"id": "cerebras/gpt-oss-120b", "name": "Cerebras GPT OSS 120B", "provider": "cerebras", "real_id": "gpt-oss-120b"},
-    {"id": "cerebras/zai-glm-4.7", "name": "Cerebras ZAI GLM 4.7", "provider": "cerebras", "real_id": "zai-glm-4.7"},
+    # Cerebras models
+    {
+        "id": "cerebras/gpt-oss-120b",
+        "name": "Cerebras GPT OSS 120B",
+        "provider": "Cerebras",
+        "channel": "Cerebras",
+        "real_id": "gpt-oss-120b",
+    },
+    {
+        "id": "cerebras/zai-glm-4.7",
+        "name": "Cerebras ZAI GLM 4.7",
+        "provider": "Cerebras",
+        "channel": "Cerebras",
+        "real_id": "zai-glm-4.7",
+    },
 ]
 
 
@@ -78,36 +182,12 @@ def check_password(password: str) -> bool:
     return password == APP_PASSWORD
 
 
-def find_model(model_id: str) -> Dict[str, Any]:
+def find_model(model_id: str) -> dict:
     for model in MODELS:
         if model["id"] == model_id:
             return model
+
     return MODELS[0]
-
-
-def build_messages(user_message: str, history_items: Optional[List[ChatMessage]]) -> List[Dict[str, str]]:
-    system_message = {
-        "role": "system",
-        "content": "你是 MaGary AI，也是马广辉的中文助手。请用幽默、自然、清楚的中文回答。"
-    }
-
-    history = []
-    if history_items:
-        for item in history_items[-10:]:
-            if item.role in ["user", "assistant"] and item.content.strip():
-                history.append({
-                    "role": item.role,
-                    "content": item.content.strip()
-                })
-
-    return [
-        system_message,
-        *history,
-        {
-            "role": "user",
-            "content": user_message
-        }
-    ]
 
 
 @app.get("/")
@@ -139,13 +219,18 @@ def auth(req: AuthRequest):
 
     return JSONResponse(
         status_code=401,
-        content={"ok": False, "error": "访问密码错误"}
+        content={
+            "ok": False,
+            "error": "访问密码错误"
+        }
     )
 
 
 @app.get("/models")
 def get_models():
-    return {"models": MODELS}
+    return {
+        "models": MODELS
+    }
 
 
 @app.get("/debug-key")
@@ -154,10 +239,12 @@ def debug_key():
         "has_openrouter_key": bool(OPENROUTER_API_KEY),
         "openrouter_key_start": OPENROUTER_API_KEY[:10] if OPENROUTER_API_KEY else None,
         "openrouter_key_length": len(OPENROUTER_API_KEY) if OPENROUTER_API_KEY else 0,
+
         "has_cerebras_key": bool(CEREBRAS_API_KEY),
         "cerebras_key_start": CEREBRAS_API_KEY[:10] if CEREBRAS_API_KEY else None,
         "cerebras_key_length": len(CEREBRAS_API_KEY) if CEREBRAS_API_KEY else 0,
-        "has_app_password": bool(APP_PASSWORD)
+
+        "has_app_password": bool(APP_PASSWORD),
     }
 
 
@@ -166,60 +253,93 @@ def chat(req: ChatRequest):
     if not check_password(req.password):
         return JSONResponse(
             status_code=401,
-            content={"error": "访问密码错误"}
+            content={
+                "error": "访问密码错误"
+            }
         )
 
     user_message = req.message.strip()
+
     if not user_message:
         return JSONResponse(
             status_code=400,
-            content={"error": "消息不能为空"}
+            content={
+                "error": "消息不能为空"
+            }
         )
 
-    selected_model = find_model(req.model or "openrouter/free")
-    provider = selected_model.get("provider", "openrouter")
+    safe_max_tokens = min(max(int(req.max_tokens or 1024), 128), 2048)
+
+    selected_model = find_model(req.model)
+    provider = selected_model.get("provider", "OpenRouter").lower()
+
+    system_message = {
+        "role": "system",
+        "content": "你是 MaGary AI，是马广辉的中文 AI 助手。请用自然、清楚、适当幽默的中文回答。"
+    }
+
+    history = []
+
+    if req.history:
+        for item in req.history[-10:]:
+            if item.role in ["user", "assistant"] and item.content.strip():
+                history.append({
+                    "role": item.role,
+                    "content": item.content.strip()
+                })
+
+    messages = [
+        system_message,
+        *history,
+        {
+            "role": "user",
+            "content": user_message
+        }
+    ]
 
     if provider == "cerebras":
         if not CEREBRAS_API_KEY:
             return JSONResponse(
                 status_code=500,
-                content={"error": "CEREBRAS_API_KEY 未配置，请检查 Render 环境变量"}
+                content={
+                    "error": "CEREBRAS_API_KEY 未配置，请检查 Render 环境变量"
+                }
             )
 
         api_url = CEREBRAS_URL
         api_key = CEREBRAS_API_KEY
-        request_model = selected_model.get("real_id", selected_model["id"])
+        model_name = selected_model.get("real_id", selected_model["id"])
 
         headers = {
             "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
     else:
         if not OPENROUTER_API_KEY:
             return JSONResponse(
                 status_code=500,
-                content={"error": "OPENROUTER_API_KEY 未配置，请检查 Render 环境变量"}
+                content={
+                    "error": "OPENROUTER_API_KEY 未配置，请检查 Render 环境变量"
+                }
             )
 
         api_url = OPENROUTER_URL
         api_key = OPENROUTER_API_KEY
-        request_model = selected_model["id"]
+        model_name = selected_model["id"]
 
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
             "HTTP-Referer": "https://guanghui-ai-chat.onrender.com",
-            "X-Title": "MaGary AI"
+            "X-Title": "MaGary AI",
         }
 
-    safe_max_tokens = min(max(int(req.max_tokens or 1024), 128), 2048)
-
     payload = {
-        "model": request_model,
-        "messages": build_messages(user_message, req.history),
+        "model": model_name,
+        "messages": messages,
         "max_tokens": safe_max_tokens,
-        "temperature": 0.7
+        "temperature": 0.7,
     }
 
     try:
@@ -227,7 +347,7 @@ def chat(req: ChatRequest):
             api_url,
             headers=headers,
             json=payload,
-            timeout=90
+            timeout=90,
         )
 
         try:
@@ -236,8 +356,10 @@ def chat(req: ChatRequest):
             return JSONResponse(
                 status_code=resp.status_code,
                 content={
-                    "error": f"{provider} 返回了非 JSON 内容",
-                    "raw": resp.text
+                    "error": "模型接口返回了非 JSON 内容",
+                    "raw": resp.text,
+                    "provider": selected_model.get("provider"),
+                    "model": selected_model.get("id"),
                 }
             )
 
@@ -247,36 +369,57 @@ def chat(req: ChatRequest):
             if isinstance(error_obj, dict):
                 error_msg = error_obj.get("message") or str(error_obj)
             else:
-                error_msg = error_obj or f"{provider} 请求失败"
+                error_msg = error_obj or "模型接口请求失败"
 
             return JSONResponse(
                 status_code=resp.status_code,
                 content={
                     "error": error_msg,
                     "status_code": resp.status_code,
-                    "provider": provider,
-                    "model": selected_model["id"],
-                    "raw": result
+                    "raw": result,
+                    "provider": selected_model.get("provider"),
+                    "model": selected_model.get("id"),
                 }
             )
 
-        reply = result["choices"][0]["message"]["content"]
+        reply = ""
+
+        if "choices" in result and result["choices"]:
+            choice = result["choices"][0]
+
+            if "message" in choice and isinstance(choice["message"], dict):
+                reply = choice["message"].get("content", "")
+
+            if not reply:
+                reply = choice.get("text", "")
+
+        if not reply:
+            reply = "模型返回了空内容。"
 
         return {
             "reply": reply,
-            "model": selected_model["id"],
-            "provider": provider,
-            "raw_model": result.get("model", request_model)
+            "model": selected_model.get("id"),
+            "real_model": model_name,
+            "provider": selected_model.get("provider"),
+            "channel": selected_model.get("channel"),
         }
 
     except requests.exceptions.Timeout:
         return JSONResponse(
             status_code=504,
-            content={"error": "请求超时，请换个模型或稍后再试"}
+            content={
+                "error": "请求超时，请换个模型或稍后再试",
+                "provider": selected_model.get("provider"),
+                "model": selected_model.get("id"),
+            }
         )
 
     except Exception as e:
         return JSONResponse(
             status_code=500,
-            content={"error": str(e)}
+            content={
+                "error": str(e),
+                "provider": selected_model.get("provider"),
+                "model": selected_model.get("id"),
+            }
         )
