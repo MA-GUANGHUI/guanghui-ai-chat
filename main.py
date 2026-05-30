@@ -12,6 +12,8 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
+APP_PASSWORD = os.getenv("APP_PASSWORD", "").strip()
 
 app = FastAPI(title="GuangHui AI Chat")
 
@@ -26,6 +28,7 @@ class ChatRequest(BaseModel):
     model: str = "openrouter/free"
     history: Optional[List[ChatMessage]] = []
     max_tokens: int = 1024
+    password: str = ""
 
 
 MODELS = [
@@ -35,7 +38,6 @@ MODELS = [
     {"id": "poolside/laguna-xs.2:free", "name": "Poolside Laguna XS.2 Free"},
     {"id": "poolside/laguna-m.1:free", "name": "Poolside Laguna M.1 Free"},
     {"id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "name": "NVIDIA Nemotron 3 Free"},
-
     {"id": "deepseek/deepseek-v4-flash", "name": "DeepSeek V4 Flash"},
     {"id": "deepseek/deepseek-v4-pro", "name": "DeepSeek V4 Pro"},
     {"id": "qwen/qwen3.7-max", "name": "Qwen3.7 Max"},
@@ -50,11 +52,6 @@ MODELS = [
     {"id": "~anthropic/claude-sonnet-latest", "name": "Claude Sonnet Latest"},
     {"id": "x-ai/grok-4.3", "name": "Grok 4.3"},
 ]
-
-
-def get_openrouter_key():
-    key = os.getenv("OPENROUTER_API_KEY", "")
-    return key.strip()
 
 
 @app.get("/")
@@ -74,74 +71,36 @@ def get_models():
 
 @app.get("/debug-key")
 def debug_key():
-    key = get_openrouter_key()
-
     return {
-        "has_key": bool(key),
-        "key_start": key[:10] if key else None,
-        "key_length": len(key) if key else 0
+        "has_openrouter_key": bool(OPENROUTER_API_KEY),
+        "key_start": OPENROUTER_API_KEY[:10] if OPENROUTER_API_KEY else None,
+        "key_length": len(OPENROUTER_API_KEY) if OPENROUTER_API_KEY else 0,
+        "has_app_password": bool(APP_PASSWORD)
     }
-
-
-@app.get("/test-openrouter")
-def test_openrouter():
-    key = get_openrouter_key()
-
-    if not key:
-        return JSONResponse(
-            status_code=500,
-            content={"error": "OPENROUTER_API_KEY 未读取到"}
-        )
-
-    headers = {
-        "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://guanghui-ai-chat.onrender.com",
-        "X-Title": "GuangHui AI Chat"
-    }
-
-    payload = {
-        "model": "openrouter/free",
-        "messages": [
-            {"role": "user", "content": "hello"}
-        ],
-        "max_tokens": 64
-    }
-
-    try:
-        resp = requests.post(
-            OPENROUTER_URL,
-            headers=headers,
-            json=payload,
-            timeout=60
-        )
-
-        return {
-            "status_code": resp.status_code,
-            "response": resp.json()
-        }
-
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={"error": str(e)}
-        )
 
 
 @app.post("/chat")
 def chat(req: ChatRequest):
-    key = get_openrouter_key()
+    if APP_PASSWORD and req.password != APP_PASSWORD:
+        return JSONResponse(
+            status_code=401,
+            content={"error": "访问密码错误"}
+        )
 
-    if not key:
+    if not OPENROUTER_API_KEY:
         return JSONResponse(
             status_code=500,
-            content={
-                "error": "OPENROUTER_API_KEY 未配置。请检查 Render Environment Variables。"
-            }
+            content={"error": "OPENROUTER_API_KEY 未配置，请检查 Render 环境变量"}
+        )
+
+    if not req.message.strip():
+        return JSONResponse(
+            status_code=400,
+            content={"error": "消息不能为空"}
         )
 
     headers = {
-        "Authorization": f"Bearer {key}",
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
         "HTTP-Referer": "https://guanghui-ai-chat.onrender.com",
         "X-Title": "GuangHui AI Chat"
@@ -161,18 +120,16 @@ def chat(req: ChatRequest):
                     "content": item.content.strip()
                 })
 
-    messages = [
-        system_message,
-        *history,
-        {
-            "role": "user",
-            "content": req.message.strip()
-        }
-    ]
-
     payload = {
         "model": req.model or "openrouter/free",
-        "messages": messages,
+        "messages": [
+            system_message,
+            *history,
+            {
+                "role": "user",
+                "content": req.message.strip()
+            }
+        ],
         "max_tokens": min(int(req.max_tokens or 1024), 2048),
         "temperature": 0.7
     }
