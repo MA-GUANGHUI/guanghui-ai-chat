@@ -1196,7 +1196,7 @@
 
       <section class="chat-area" id="chatArea">
         <div class="welcome" id="welcome">
-          <div class="hero-badge"><span></span> Online · OpenRouter Powered</div>
+          <div class="hero-badge"><span></span> Online · Multi-Provider Powered</div>
           <h1>MaGary AI</h1>
           <p>你的私人 AI 工作台。选择模型，输入问题，然后让机器替人类分担一点点脑力劳动。</p>
 
@@ -1280,8 +1280,10 @@
     let selectedModelId = "openrouter/free";
 
     const fallbackModels = [
-      { id: "openrouter/free", name: "OpenRouter Free" },
-      { id: "deepseek/deepseek-v4-flash:free", name: "DeepSeek V4 Flash Free" },
+      { id: "openrouter/free", name: "OpenRouter Free", provider: "openrouter" },
+      { id: "cerebras/gpt-oss-120b", name: "Cerebras GPT OSS 120B", provider: "cerebras" },
+      { id: "cerebras/zai-glm-4.7", name: "Cerebras ZAI GLM 4.7", provider: "cerebras" },
+      { id: "deepseek/deepseek-v4-flash:free", name: "DeepSeek V4 Flash Free", provider: "openrouter" },
       { id: "openrouter/owl-alpha", name: "Owl Alpha Free" },
       { id: "poolside/laguna-xs.2:free", name: "Poolside Laguna XS.2 Free" },
       { id: "poolside/laguna-m.1:free", name: "Poolside Laguna M.1 Free" },
@@ -1313,7 +1315,9 @@
 
     function modelInitial(model) {
       const n = model.name.toLowerCase();
+      const id = model.id.toLowerCase();
 
+      if (n.includes("cerebras") || id.includes("cerebras")) return "CB";
       if (n.includes("deepseek")) return "D";
       if (n.includes("gpt") || n.includes("openai")) return "G";
       if (n.includes("claude")) return "C";
@@ -1768,7 +1772,7 @@
 
         const id = document.createElement("div");
         id.className = "model-id";
-        id.textContent = model.id;
+        id.textContent = model.provider ? `${model.provider} · ${model.id}` : model.id;
 
         info.appendChild(name);
         info.appendChild(id);
@@ -1776,7 +1780,7 @@
         const tag = document.createElement("div");
         const free = isFreeModel(model);
         tag.className = "model-tag " + (free ? "free" : "paid");
-        tag.textContent = free ? "FREE" : "PAID";
+        tag.textContent = model.provider === "cerebras" ? "CEREBRAS" : (free ? "FREE" : "PAID");
 
         option.appendChild(icon);
         option.appendChild(info);
