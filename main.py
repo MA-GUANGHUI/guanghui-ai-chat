@@ -16,7 +16,7 @@ APP_PASSWORD = os.getenv("APP_PASSWORD", "").strip()
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-app = FastAPI(title="GuangHui AI Chat")
+app = FastAPI(title="MaGary AI")
 
 
 class AuthRequest(BaseModel):
@@ -140,15 +140,15 @@ def chat(req: ChatRequest):
     safe_max_tokens = min(max(int(req.max_tokens or 1024), 128), 2048)
 
     headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://guanghui-ai-chat.onrender.com",
-        "X-Title": "GuangHui AI Chat"
+    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+    "Content-Type": "application/json",
+    "HTTP-Referer": "https://guanghui-ai-chat.onrender.com",
+    "X-Title": "MaGary AI"
     }
 
     system_message = {
         "role": "system",
-        "content": "你是 GuangHui AI Chat 的中文助手。请用简洁、清楚、自然的中文回答。"
+        "content": "你是马广辉的中文助手。请用幽默、自然的中文回答。"
     }
 
     history = []
