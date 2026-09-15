@@ -15,6 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
 CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY", "").strip()
 NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY", "").strip()
+GARYAPIKEY = os.getenv("GARYAPIKEY", "").strip()
 APP_PASSWORD = os.getenv("APP_PASSWORD", "").strip()
 
 app = FastAPI(title="MaGary AI")
@@ -63,6 +64,12 @@ PROVIDERS: Dict[str, Dict[str, Any]] = {
         "label": "NVIDIA",
         "api_key": NVIDIA_API_KEY,
         "base_url": "https://integrate.api.nvidia.com/v1",
+        "extra_headers": {},
+    },
+    "sensenova": {
+        "label": "SenseNova",
+        "api_key": GARYAPIKEY,
+        "base_url": "https://token.sensenova.cn/v1",
         "extra_headers": {},
     },
 }
@@ -116,12 +123,18 @@ load_extra_providers()
 MODELS: List[Dict[str, Any]] = [
     # OpenRouter
     {"id": "openrouter/free", "name": "OpenRouter Free", "provider": "openrouter", "real_id": "openrouter/free", "family": "Free Router"},
-    {"id": "deepseek/deepseek-v4-flash", "name": "DeepSeek V4 Flash", "provider": "openrouter", "real_id": "deepseek/deepseek-v4-flash", "family": "DeepSeek"},
-    {"id": "deepseek/deepseek-v4-pro", "name": "DeepSeek V4 Pro", "provider": "openrouter", "real_id": "deepseek/deepseek-v4-pro", "family": "DeepSeek"},
+    {"id": "deepseek/deepseek-v4-flash", "name": "DeepSeek V4 Flash · OpenRouter", "provider": "openrouter", "real_id": "deepseek/deepseek-v4-flash", "family": "DeepSeek"},
+    {"id": "deepseek/deepseek-v4-pro", "name": "DeepSeek V4 Pro · OpenRouter", "provider": "openrouter", "real_id": "deepseek/deepseek-v4-pro", "family": "DeepSeek"},
     {"id": "x-ai/grok-4.3", "name": "Grok 4.3", "provider": "openrouter", "real_id": "x-ai/grok-4.3", "family": "xAI"},
 
     # NVIDIA NIM, direct API
     {"id": "nvidia/nemotron-3-super-120b-a12b", "name": "NVIDIA Nemotron 3 Super 120B", "provider": "nvidia", "real_id": "nvidia/nemotron-3-super-120b-a12b", "family": "NIM"},
+
+    # SenseNova
+    {"id": "sensenova/deepseek-v4-flash", "name": "DeepSeek V4 Flash · SenseNova", "provider": "sensenova", "real_id": "deepseek-v4-flash", "family": "SenseNova"},
+    {"id": "sensenova/glm-5.2", "name": "GLM 5.2 · SenseNova", "provider": "sensenova", "real_id": "glm-5.2", "family": "SenseNova"},
+    {"id": "sensenova/sensenova-6.8-flash-lite", "name": "SenseNova 6.8 Flash Lite", "provider": "sensenova", "real_id": "sensenova-6.8-flash-lite", "family": "SenseNova"},
+    {"id": "sensenova/deepseek-v4-pro", "name": "DeepSeek V4 Pro · SenseNova", "provider": "sensenova", "real_id": "deepseek-v4-pro", "family": "SenseNova"},
 ]
 
 
