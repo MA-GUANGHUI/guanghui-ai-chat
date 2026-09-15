@@ -115,38 +115,13 @@ load_extra_providers()
 
 MODELS: List[Dict[str, Any]] = [
     # OpenRouter
-    {"id": "openrouter/free", "name": "OpenRouter Free", "provider": "openrouter", "real_id": "openrouter/free", "family": "Router"},
-    {"id": "deepseek/deepseek-v4-flash:free", "name": "DeepSeek V4 Flash Free", "provider": "openrouter", "real_id": "deepseek/deepseek-v4-flash:free", "family": "Free"},
-    {"id": "openrouter/owl-alpha", "name": "Owl Alpha Free", "provider": "openrouter", "real_id": "openrouter/owl-alpha", "family": "Free"},
-    {"id": "poolside/laguna-xs.2:free", "name": "Poolside Laguna XS.2 Free", "provider": "openrouter", "real_id": "poolside/laguna-xs.2:free", "family": "Free"},
-    {"id": "poolside/laguna-m.1:free", "name": "Poolside Laguna M.1 Free", "provider": "openrouter", "real_id": "poolside/laguna-m.1:free", "family": "Free"},
-    {"id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "name": "NVIDIA Nemotron 3 Free", "provider": "openrouter", "real_id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "family": "OpenRouter"},
+    {"id": "openrouter/free", "name": "OpenRouter Free", "provider": "openrouter", "real_id": "openrouter/free", "family": "Free Router"},
     {"id": "deepseek/deepseek-v4-flash", "name": "DeepSeek V4 Flash", "provider": "openrouter", "real_id": "deepseek/deepseek-v4-flash", "family": "DeepSeek"},
     {"id": "deepseek/deepseek-v4-pro", "name": "DeepSeek V4 Pro", "provider": "openrouter", "real_id": "deepseek/deepseek-v4-pro", "family": "DeepSeek"},
-    {"id": "qwen/qwen3.7-max", "name": "Qwen3.7 Max", "provider": "openrouter", "real_id": "qwen/qwen3.7-max", "family": "Qwen"},
-    {"id": "qwen/qwen3.6-flash", "name": "Qwen3.6 Flash", "provider": "openrouter", "real_id": "qwen/qwen3.6-flash", "family": "Qwen"},
-    {"id": "google/gemini-3.5-flash", "name": "Gemini 3.5 Flash", "provider": "openrouter", "real_id": "google/gemini-3.5-flash", "family": "Google"},
-    {"id": "google/gemini-3.1-flash-lite", "name": "Gemini 3.1 Flash Lite", "provider": "openrouter", "real_id": "google/gemini-3.1-flash-lite", "family": "Google"},
-    {"id": "~google/gemini-flash-latest", "name": "Gemini Flash Latest", "provider": "openrouter", "real_id": "~google/gemini-flash-latest", "family": "Google"},
-    {"id": "openai/gpt-chat-latest", "name": "GPT Chat Latest", "provider": "openrouter", "real_id": "openai/gpt-chat-latest", "family": "OpenAI"},
-    {"id": "~openai/gpt-mini-latest", "name": "GPT Mini Latest", "provider": "openrouter", "real_id": "~openai/gpt-mini-latest", "family": "OpenAI"},
-    {"id": "anthropic/claude-opus-4.8", "name": "Claude Opus 4.8", "provider": "openrouter", "real_id": "anthropic/claude-opus-4.8", "family": "Anthropic"},
-    {"id": "~anthropic/claude-haiku-latest", "name": "Claude Haiku Latest", "provider": "openrouter", "real_id": "~anthropic/claude-haiku-latest", "family": "Anthropic"},
-    {"id": "~anthropic/claude-sonnet-latest", "name": "Claude Sonnet Latest", "provider": "openrouter", "real_id": "~anthropic/claude-sonnet-latest", "family": "Anthropic"},
     {"id": "x-ai/grok-4.3", "name": "Grok 4.3", "provider": "openrouter", "real_id": "x-ai/grok-4.3", "family": "xAI"},
 
-    # Cerebras
-    {"id": "cerebras/gpt-oss-120b", "name": "Cerebras GPT OSS 120B", "provider": "cerebras", "real_id": "gpt-oss-120b", "family": "Fast LLM"},
-    {"id": "cerebras/zai-glm-4.7", "name": "Cerebras ZAI GLM 4.7", "provider": "cerebras", "real_id": "zai-glm-4.7", "family": "Fast LLM"},
-
     # NVIDIA NIM, direct API
-    {"id": "nvidia/nemotron-3-nano-30b-a3b", "name": "NVIDIA Nemotron 3 Nano 30B", "provider": "nvidia", "real_id": "nvidia/nemotron-3-nano-30b-a3b", "family": "NIM"},
     {"id": "nvidia/nemotron-3-super-120b-a12b", "name": "NVIDIA Nemotron 3 Super 120B", "provider": "nvidia", "real_id": "nvidia/nemotron-3-super-120b-a12b", "family": "NIM"},
-    {"id": "nvidia/llama-3.3-nemotron-super-49b-v1.5", "name": "NVIDIA Nemotron Super 49B", "provider": "nvidia", "real_id": "nvidia/llama-3.3-nemotron-super-49b-v1.5", "family": "NIM"},
-    {"id": "nvidia/llama-3.1-nemotron-ultra-253b-v1", "name": "NVIDIA Nemotron Ultra 253B", "provider": "nvidia", "real_id": "nvidia/llama-3.1-nemotron-ultra-253b-v1", "family": "NIM"},
-    {"id": "nvidia/qwen3-next-80b-a3b-instruct", "name": "NVIDIA Qwen3 Next 80B", "provider": "nvidia", "real_id": "qwen/qwen3-next-80b-a3b-instruct", "family": "NIM"},
-    {"id": "nvidia/qwen2.5-coder-32b-instruct", "name": "NVIDIA Qwen2.5 Coder 32B", "provider": "nvidia", "real_id": "qwen/qwen2.5-coder-32b-instruct", "family": "Code"},
-    {"id": "nvidia/kimi-k2-instruct", "name": "NVIDIA Kimi K2 Instruct", "provider": "nvidia", "real_id": "moonshotai/kimi-k2-instruct", "family": "NIM"},
 ]
 
 
